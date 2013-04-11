@@ -1,0 +1,35 @@
+<head>
+  <title>mongo-gmap</title>
+  <script src="//maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script>
+</head>
+
+<body>
+  {{> controls}}
+  {{> map}}
+</body>
+
+<template name="map">
+    {{#constant}}
+      <div id="map"></div>
+    {{/constant}}
+</template>
+
+<template name="controls">
+  <form class="js-map-form form-inline" action="#">
+    <div class="form-actions">
+      <div class="span8">
+        {{#each directions}}
+          <input type="text" placeholder="{{dir}}" class="rect-{{dir}} span1" value="{{coord}}">
+        {{/each}}
+        <button type="submit" class="btn js-draw-rect">Draw Rectangle</button>
+      </div>
+      <div class="span4 pull-right">
+        <button type="button" class="btn js-seed-map">Seed Points</button>
+      </div>
+    </div>
+  </form>
+
+</template>
+
+
+
