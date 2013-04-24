@@ -23,7 +23,7 @@ if Meteor.isClient
 
 
   Template.controls.directions = ->
-    coords = Session.get("coords") or {}
+    coords = Session.get("coords") or {top: 60, left: -170, bottom: 40, right: -130}
     {dir: dir, coord: coords[dir]} for dir in _.w("top left bottom right")
 
   Template.controls.events
@@ -58,8 +58,9 @@ if Meteor.isClient
 
       globals.gPolygon.setMap(globals.map)
 
+      useGeoJSON = template.find('.js-geojson').checked
 
-      Meteor.call "getPins", polygon, (error, pins) ->
+      Meteor.call "getPins", polygon, useGeoJSON, (error, pins) ->
         globals.markers or= []
 
         marker.setMap(null) while marker = globals.markers.pop()
@@ -93,10 +94,13 @@ if Meteor.isServer
             type: "Point"
             coordinates: [(lng * 4) - 180, (lat * 4) - 90]
 
-    getPins: (polygon) ->
-      selector = loc: "$geoWithin": "$geometry":
-        "type": "Polygon"
-        "coordinates": [ polygon ]
+    getPins: (polygon, useGeoJSON = true) ->
+      if useGeoJSON
+        selector = loc: "$geoWithin": "$geometry":
+          "type": "Polygon"
+          "coordinates": [ polygon ]
+      else
+        selector = loc: "$geoWithin": "$box": [ polygon[3], polygon[1] ]
 
       pins = Pins.find(selector, limit: 2000).fetch()
       return pins

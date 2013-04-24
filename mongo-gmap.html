@@ -21,6 +21,7 @@
         {{#each directions}}
           <input type="text" placeholder="{{dir}}" class="rect-{{dir}} span1" value="{{coord}}">
         {{/each}}
+        <label>GeoJSON? <input type="checkbox" class="js-geojson" checked></label>
         <button type="submit" class="btn js-draw-rect">Draw Rectangle</button>
       </div>
       <div class="span4 pull-right">
