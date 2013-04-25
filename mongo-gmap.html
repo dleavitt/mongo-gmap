@@ -17,14 +17,28 @@
 <template name="controls">
   <form class="js-map-form form-inline" action="#">
     <div class="form-actions">
-      <div class="span8">
+      <div class="span9">
         {{#each directions}}
           <input type="text" placeholder="{{dir}}" class="rect-{{dir}} span1" value="{{coord}}">
         {{/each}}
-        <label>GeoJSON? <input type="checkbox" class="js-geojson" checked></label>
+        
+        <strong>Shape</strong>
+        <label class="radio">
+          <input type="radio" name="shape" class="js-shape" value="polygon" checked>
+          Polygon
+        </label>
+        <label class="radio">
+          <input type="radio" name="shape" class="js-shape" value="box" checked>
+          Box
+        </label>
+        <label class="radio">
+          <input type="radio" name="shape" class="js-shape" value="high-res-polygon" checked>
+          High-Res Polygon
+        </label>
+        
         <button type="submit" class="btn js-draw-rect">Draw Rectangle</button>
       </div>
-      <div class="span4 pull-right">
+      <div class="span3 pull-right">
         <button type="button" class="btn js-seed-map">Seed Points</button>
       </div>
     </div>

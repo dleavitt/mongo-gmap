@@ -38,11 +38,44 @@ if Meteor.isClient
 
       Session.set "coords", c
 
+
+      spansDateline = false
+      if c.left > c.right
+        c.left -= 360
+        spansDateline = true
+
       polygon = [ [c.left, c.top],
                   [c.right, c.top],
                   [c.right, c.bottom],
                   [c.left, c.bottom],
                   [c.left, c.top] ]
+
+      shape = template.find('.js-shape:checked').value
+      log shape
+      if shape is "high-res-polygon"
+        interPoints = 2
+        highResPolygon = []
+        _.reduce polygon, (a, b) =>
+          highResPolygon.push(a)
+          
+          [[x1, y1], [x2, y2]] = [a, b]
+
+          for intervalFraction in _.range(1, interPoints)
+            newPoint = for axis in [0,1]
+              a[axis] + (b[axis] - a[axis]) * intervalFraction / interPoints + Math.random() * 1
+
+            highResPolygon.push(newPoint)
+          b
+        highResPolygon.push _.last(polygon) 
+        
+        if spansDateline
+          polygon = _.map polygon, (coords) ->
+            if coords[0] < -180
+              [coords[0] + 360, coords[1]]
+            else
+              [coords[0], coords[1]]
+
+        polygon = highResPolygon
 
       gCoords = (new google.maps.LatLng(point[1], point[0]) for point in polygon)
 
@@ -58,8 +91,8 @@ if Meteor.isClient
 
       globals.gPolygon.setMap(globals.map)
 
-      useGeoJSON = template.find('.js-geojson').checked
 
+      useGeoJSON = shape isnt "box"
       Meteor.call "getPins", polygon, useGeoJSON, (error, pins) ->
         globals.markers or= []
 
@@ -90,7 +123,8 @@ if Meteor.isServer
       Pins.remove({})
       [0..90].forEach (lng) ->
         [0..45].forEach (lat) ->
-          Pins.insert loc:
+          Pins.insert loc: 
+            # {lng: (lng * 4) - 180, lat: (lat * 4) - 90}
             type: "Point"
             coordinates: [(lng * 4) - 180, (lat * 4) - 90]
 
@@ -100,10 +134,9 @@ if Meteor.isServer
           "type": "Polygon"
           "coordinates": [ polygon ]
       else
-        selector = loc: "$geoWithin": "$box": [ polygon[3], polygon[1] ]
-
-      pins = Pins.find(selector, limit: 2000).fetch()
-      return pins
+        selector = loc: "$within": "$box": [ polygon[3], polygon[1] ]
+        
+      Pins.find(selector, limit: 2000).fetch()
 
 
 # code to run on server at startup
